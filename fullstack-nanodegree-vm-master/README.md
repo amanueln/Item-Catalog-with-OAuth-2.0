@@ -12,9 +12,12 @@ The Flask application uses stored HTML templates in the tempaltes folder to buil
 1. Python
 2. HTML
 3. CSS
-4. OAuth
+4. OAuth 2.0
 5. Flask Framework
 6.jquery
+7.jinja2
+8.Third party API
+9.JSON
 
 ## Installation
 There are some dependancies and a few instructions on how to run the application.
