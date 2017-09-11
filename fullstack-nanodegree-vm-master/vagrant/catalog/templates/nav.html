@@ -32,7 +32,9 @@
             <div class="col-md-12">         
                 <div id="mySidenav" class="sidenav"> 
                  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> 
+                  {% if 'username' in session %}
                   <a href="/newcatalog"><button class="btn btn-primary left-block"> Add New Catagory</button></a>
+                  {% endif %}
                    <hr>
                     {% for c in catalog%}
                     <a class="text-uppercase" href="/catalog/{{c.id}}/items">{{c.catalog_name}}</a>

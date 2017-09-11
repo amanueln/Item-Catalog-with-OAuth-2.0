@@ -68,22 +68,13 @@ def login():
 def gconnect():
     # Ensure that the request is not a forgery and that the user sending
     # this connect request is the expected user.
-    print request.args.get('state', ''), login_session['state']
     if request.args.get('state', '') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-        # output of the state for testing
-    test = request.args.get('state', '')
-    print 'the return state is: %s and the stored state is: %s ' \
-          % (test, login_session['state'])
 
     # Obtain authorization code
     code = request.data
-
-    # output the  authorization code
-    print 'the return authorization code from google is: %s  ' % code
-
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
@@ -97,7 +88,6 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
-    print 'the access token: %s  ' % access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            % access_token)
     h = httplib2.Http()
@@ -110,9 +100,6 @@ def gconnect():
 
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
-    print 'the intended user: %s  ' % gplus_id
-    print 'the stored user: %s  ' % result['user_id']
-
     if result['user_id'] != gplus_id:
         response = make_response(
             json.dumps("Token's user ID doesn't match given user ID."), 401)
@@ -120,12 +107,9 @@ def gconnect():
         return response
 
     # Verify that the access token is valid for this app.
-    print 'the issued to user id: %s  ' % result['issued_to']
-    print 'the Client ID: %s  ' % CLIENT_ID
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
         response.headers['Content-Type'] = 'application/json'
         return response
     # checks if user is connected already and redirects.
@@ -147,8 +131,6 @@ def gconnect():
     answer = requests.get(userinfo_url, params=params)
 
     data = answer.json()
-    print 'the user info data: %s  ' % data
-
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
@@ -167,7 +149,6 @@ def gconnect():
     output += '" style = "width: 300px; height: 300px;border-radius: \ ' \
               '150px;-webkit-border-radius:150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
     return output
 
 
@@ -180,21 +161,15 @@ def gconnect():
 def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
-        print 'Access Token is None'
         message = 'Current user not connected.'
 
         flash(message)
         return redirect(url_for('home'))
 
-    print 'In gdisconnect access token is %s', access_token
-    print 'User name is: '
-    print login_session['username']
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' \
           % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
-    print 'result is '
-    print result
     if result['status'] == '200':
         del login_session['access_token']
         del login_session['gplus_id']
@@ -295,9 +270,6 @@ def createItem(name, image, description, catId):
 # shows latest Categories added.
 @app.route('/catalog/')
 @app.route("/")
-# Home page that shows latest items added.
-@app.route('/catalog/')
-@app.route("/")
 def home():
     # lists current catalogs created.
     catalogMenu = session.query(Catalog).order_by(Catalog.id.desc()) \
@@ -324,7 +296,9 @@ def allItems(catalog_id):
     currentCatName = session.query(Catalog).filter_by(id=catalog_id) \
         .one_or_none()
     if currentCatName is None:
-        return redirect(url_for('home'))
+        newcurrentCatName = session.query(Catalog).filter_by(id=catalog_id) \
+            .first
+        return redirect(url_for('home',currentCatalog=newcurrentCatName))
     catalogMenu = session.query(Catalog).limit(12).all()
     currentCatalog = session.query(Catalog).filter_by(id=catalog_id).all()
     items = session.query(CatalogItem). \
@@ -477,13 +451,31 @@ def newitem(catalog_id):
 
 
 # deletes a category
-@app.route("/deletecatalog")
-def deleteCatalog():
-    # Insert a Person in the person table
-    delete_catalog = session.query(Catalog).first()
-    session.delete(delete_catalog)
-    session.commit()
-    return 'Catalog deleted'
+@app.route("/catalog/<int:catalog_id>/delete")
+def deleteCatalog(catalog_id):
+    if 'username' not in login_session:
+        return redirect('/login')
+    else:
+        # Insert a Person in the person table
+        delete_catalog = session.query(Catalog).\
+            filter_by(id=catalog_id).one_or_none()
+        if delete_catalog is None:
+            return redirect(url_for('home'))
+        else:
+            if login_session['username'] != delete_catalog.user.username:
+                message = "you dont have permissin to delete this!!!"
+                flash(message)
+            else:
+                delete_catalog_items = session.query(CatalogItem)\
+                    .filter_by(catalog_id=catalog_id).all()
+                session.delete(delete_catalog)
+                for items in delete_catalog_items:
+                    session.delete(items)
+                    session.commit()
+                session.commit()
+                message = "catalog deleted!!!"
+                flash(message)
+            return redirect(url_for('home'))
 
 
 # deletes a Item
