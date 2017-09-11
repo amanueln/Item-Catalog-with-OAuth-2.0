@@ -298,7 +298,7 @@ def allItems(catalog_id):
     if currentCatName is None:
         newcurrentCatName = session.query(Catalog).filter_by(id=catalog_id) \
             .first
-        return redirect(url_for('home',currentCatalog=newcurrentCatName))
+        return redirect(url_for('home', currentCatalog=newcurrentCatName))
     catalogMenu = session.query(Catalog).limit(12).all()
     currentCatalog = session.query(Catalog).filter_by(id=catalog_id).all()
     items = session.query(CatalogItem). \
