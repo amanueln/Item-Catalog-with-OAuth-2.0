@@ -25,7 +25,6 @@ Seperate instructions are provided to get GConnect working also.
 
 ## Dependencies
 - [Vagrant](https://www.vagrantup.com/)
-- [Udacity Vagrantfile](https://github.com/udacity/fullstack-nanodegree-vm)
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
 ## How to Install and Load your Web Server
