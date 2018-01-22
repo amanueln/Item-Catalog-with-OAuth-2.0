@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
-
+# User database
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
@@ -17,7 +17,7 @@ class User(Base):
     password = Column(String(250))
     user_image = Column(String(250))
 
-
+#Catalog database
 class Catalog(Base):
     __tablename__ = 'catalog'
     id = Column(Integer, primary_key=True)
@@ -35,7 +35,7 @@ class Catalog(Base):
             'catalog_image': self.catalog_image,
         }
 
-
+#Item catalog database
 class CatalogItem(Base):
     __tablename__ = 'item'
     id = Column(Integer, primary_key=True)
