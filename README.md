@@ -5,7 +5,7 @@ This web app is a project for the Udacity [FSND Course](https://www.udacity.com/
 This project is a RESTful web application utilizing the Flask framework which accesses a SQL database that populates categories and their items. OAuth2 provides authentication for further CRUD functionality on the application. Currently OAuth2 is implemented for Google Accounts.
 
 ## In This Repo
-This project has one main Python module `application.py` which runs the Flask application. A SQL database is created using the `modal.py` module and you can populate the database with test data using `fillDb.py`.
+This project has one main Python module `application.py` which runs the Flask application. A SQL database is created using the `modal.py` module and can populate the database with test data using `fillDb.py`.
 The Flask application uses stored HTML templates in the tempaltes folder to build the front-end of the application. CSS/JS/Images are stored in the static directory.
 
 ## Skills Honed
